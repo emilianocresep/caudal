@@ -14,7 +14,7 @@
   "d1_databases": [{ "binding": "DB", "database_name": "caudal-db" }],
   "vars": {
     "ACCESS_TEAM_DOMAIN": "morning-wave-5908.cloudflareaccess.com",
-    "ACCESS_AUD": "PEGA_AQUI_TU_AUD_COMPLETO",
+    "ACCESS_AUD": "b8e7b9f181c494368411a89ec5257af3157c6dabb8195b5c1db32d26e32efea6",
     "ALLOWED_EMAIL": "carmee1029@gmail.com"
   },
   "keep_vars": true,
