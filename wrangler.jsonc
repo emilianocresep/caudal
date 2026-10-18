@@ -1,7 +1,7 @@
 // Configuración del Worker de Caudal en Cloudflare.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "caudal", // debe coincidir con el nombre de tu Worker en Cloudflare
+  "name": "caudal",
   "main": "worker/index.js",
   "compatibility_date": "2025-10-01",
   "build": { "command": "npm run build" },
@@ -11,9 +11,12 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"]
   },
-  // La base de datos se crea sola en el primer despliegue (o se conecta si ya existe con este nombre).
   "d1_databases": [{ "binding": "DB", "database_name": "caudal-db" }],
-  // Conserva las variables que pongas en el panel (ACCESS_TEAM_DOMAIN, ACCESS_AUD, ALLOWED_EMAIL).
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "morning-wave-5908.cloudflareaccess.com",
+    "ACCESS_AUD": "PEGA_AQUI_TU_AUD_COMPLETO",
+    "ALLOWED_EMAIL": "carmee1029@gmail.com"
+  },
   "keep_vars": true,
   "observability": { "enabled": true }
 }
