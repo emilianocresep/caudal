@@ -18,6 +18,8 @@ export default {
         try { return await handleSync(request, env); }
         catch (e) { return json({ error: 'server', message: e.message || 'Error interno' }, 500); }
       }
+      // Tras iniciar sesión en Access, regresar a la app
+      if (url.pathname === '/api/login') return Response.redirect(`${url.origin}/`, 302);
       if (url.pathname === '/api/health') return json({ ok: true, app: 'caudal', db: !!env.DB });
       return json({ error: 'not_found' }, 404);
     }

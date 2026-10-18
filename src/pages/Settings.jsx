@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { db, syncState, syncNow, pendingCount, exportBackup, importBackup } from '../lib/store.js';
+import { db, syncState, syncNow, login, pendingCount, exportBackup, importBackup } from '../lib/store.js';
 import { openSheet, showToast } from '../lib/ui.js';
 import { ACCOUNT_TYPES } from '../lib/defaults.js';
 import { Orb, auraOf } from '../components/ui.jsx';
@@ -65,9 +65,9 @@ export function Settings() {
                 {s.at ? `Última vez: ${new Date(s.at).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}` : 'Aún no se sincroniza.'}
                 {pendingCount.value > 0 && ` · ${pendingCount.value} cambios por subir`}
               </div>
-              {s.message && s.status === 'error' && <div class="hint" style={{ marginTop: '6px' }}>{s.message}</div>}
+              {s.message && (s.status === 'error' || s.status === 'auth') && <div class="hint" style={{ marginTop: '6px' }}>{s.message}</div>}
               <div class="row" style={{ marginTop: '14px', gap: '8px' }}>
-                <button class="btn sm" onClick={() => (s.status === 'auth' ? location.reload() : syncNow())}><ICloud /> {s.status === 'auth' ? 'Entrar de nuevo' : 'Sincronizar ahora'}</button>
+                <button class="btn sm" onClick={() => (s.status === 'auth' ? login() : syncNow())}><ICloud /> {s.status === 'auth' ? 'Entrar de nuevo' : 'Sincronizar ahora'}</button>
               </div>
             </div>
           </div>

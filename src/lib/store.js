@@ -117,11 +117,17 @@ async function post(body) {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     credentials: 'same-origin',
+    redirect: 'manual', // si Access pide iniciar sesión, responde con una redirección
     body: JSON.stringify(body),
   });
   const type = res.headers.get('content-type') || '';
-  if (res.status === 401 || res.status === 403 || res.redirected || !type.includes('json')) {
-    const err = new Error('auth'); err.code = 'auth'; throw err;
+  if (res.type === 'opaqueredirect' || (res.status >= 300 && res.status < 400) || !type.includes('json')) {
+    const err = new Error('Cloudflare Access pide iniciar sesión'); err.code = 'auth'; throw err;
+  }
+  if (res.status === 401 || res.status === 403) {
+    let msg = 'Sesión no válida';
+    try { msg = (await res.json()).message || msg; } catch { /* sin detalle */ }
+    const err = new Error(msg); err.code = 'auth'; throw err;
   }
   const data = await res.json();
   if (!res.ok) { const err = new Error(data.message || 'Error del servidor'); err.code = data.error; throw err; }
@@ -157,13 +163,16 @@ export async function syncNow() {
     syncState.value = { status: 'ok', at: Date.now(), message: '' };
   } catch (e) {
     if (!navigator.onLine) syncState.value = { ...syncState.value, status: 'offline' };
-    else if (e.code === 'auth') syncState.value = { ...syncState.value, status: 'auth', message: 'Tu sesión expiró' };
+    else if (e.code === 'auth') syncState.value = { ...syncState.value, status: 'auth', message: e.message || 'Tu sesión expiró' };
     else syncState.value = { ...syncState.value, status: 'error', message: e.message || 'Sin conexión con el servidor' };
   } finally {
     syncing = false;
     if (again) { again = false; syncSoon(200); }
   }
 }
+
+/** Abre el inicio de sesión de Cloudflare Access y regresa a la app. */
+export function login() { location.href = '/api/login'; }
 
 export const pendingCount = computed(() => { version.value; syncState.value; return dirty.size; });
 

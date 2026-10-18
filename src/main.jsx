@@ -2,7 +2,7 @@ import { render } from 'preact';
 import { lazy, Suspense } from 'preact/compat';
 import { useEffect } from 'preact/hooks';
 import './styles.css';
-import { init, ready, syncState } from './lib/store.js';
+import { init, ready, syncState, login } from './lib/store.js';
 import { route, sheets, openSheet, closeSheet } from './lib/ui.js';
 import { Toast } from './components/ui.jsx';
 import { TxForm } from './components/TxForm.jsx';
@@ -71,7 +71,7 @@ function App() {
         {NAV.map(([k, href, label, Icon]) => <a href={href} class={active === k ? 'on' : ''}><Icon />{label}</a>)}
         <a href="#/ajustes" class={r.name === 'ajustes' ? 'on' : ''}><IGear />Ajustes</a>
         <button class="btn grad" onClick={() => openSheet('tx')}><IPlus /> Nuevo movimiento</button>
-        <div class="foot"><span class={`syncdot ${st}`} />{st === 'ok' ? 'Sincronizado' : st === 'offline' ? 'Sin conexión' : st === 'syncing' ? 'Sincronizando…' : st === 'auth' ? 'Sesión expirada' : st === 'error' ? 'Sin servidor' : ''}</div>
+        <div class="foot" title={syncState.value.message || ''}><span class={`syncdot ${st}`} />{st === 'ok' ? 'Sincronizado' : st === 'offline' ? 'Sin conexión' : st === 'syncing' ? 'Sincronizando…' : st === 'auth' ? <button class="linkbtn" onClick={login}>Iniciar sesión</button> : st === 'error' ? 'Sin servidor' : ''}</div>
       </aside>
 
       <main class={`main ${r.name === 'ajustes' ? 'narrow' : ''}`}>

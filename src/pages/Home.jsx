@@ -1,4 +1,4 @@
-import { db, movements, putMany, syncState } from '../lib/store.js';
+import { db, movements, putMany, syncState, syncNow, login } from '../lib/store.js';
 import { accountBalance, pendingForAccount, totals, computeBudget } from '../lib/finance.js';
 import { today, addDays, monthKey, monthName } from '../lib/dates.js';
 import { money, money0 } from '../lib/money.js';
@@ -68,7 +68,10 @@ export function Home() {
       </div>
 
       {sync.status === 'auth' && (
-        <div class="banner">Tu sesión expiró; tus cambios se guardan en este dispositivo.<button onClick={() => location.reload()}>Entrar</button></div>
+        <div class="banner">Tu sesión expiró; tus cambios se guardan en este dispositivo.<button onClick={login}>Entrar</button></div>
+      )}
+      {sync.status === 'error' && (
+        <div class="banner">Sin conexión con el servidor: {sync.message}<button onClick={() => syncNow()}>Reintentar</button></div>
       )}
 
       <div class="desk-2">
