@@ -16,7 +16,7 @@
   "vars": {
     // Clave opcional: escribe una aquí (por ejemplo "tacos-azules-2026") y la app te la pedirá
     // una sola vez en cada dispositivo. Déjala vacía ("") para usar la app sin ninguna clave.
-    "APP_KEY": ""
+    "APP_KEY": "gABRIELA1029"
   },
   // Conserva las variables que pongas en el panel de Cloudflare.
   "keep_vars": true,
