@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { db, syncState, syncNow, login, pendingCount, exportBackup, importBackup } from '../lib/store.js';
+import { db, syncState, syncNow, login, setAppKey, devicePref, pendingCount, exportBackup, importBackup } from '../lib/store.js';
 import { openSheet, showToast } from '../lib/ui.js';
 import { ACCOUNT_TYPES } from '../lib/defaults.js';
 import { Orb, auraOf } from '../components/ui.jsx';
@@ -7,13 +7,14 @@ import { IChevL, IChevR, IPlus, ICloud, IDown, IUp } from '../components/icons.j
 
 const STATUS = {
   idle: 'Esperando…', syncing: 'Sincronizando…', ok: 'Sincronizado', offline: 'Sin conexión — guardando en este dispositivo',
-  auth: 'Sesión expirada — vuelve a entrar', error: 'No se pudo conectar con el servidor',
+  auth: 'Sesión expirada — vuelve a entrar', key: 'Falta la clave de la app', error: 'No se pudo conectar con el servidor',
 };
 
 export function Settings() {
   const dbv = db.value;
   const s = syncState.value;
   const [tab, setTab] = useState('gasto');
+  const [key, setKey] = useState(devicePref('key', ''));
 
   function download() {
     const blob = new Blob([JSON.stringify(exportBackup())], { type: 'application/json' });
@@ -65,9 +66,16 @@ export function Settings() {
                 {s.at ? `Última vez: ${new Date(s.at).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })}` : 'Aún no se sincroniza.'}
                 {pendingCount.value > 0 && ` · ${pendingCount.value} cambios por subir`}
               </div>
-              {s.message && (s.status === 'error' || s.status === 'auth') && <div class="hint" style={{ marginTop: '6px' }}>{s.message}</div>}
+              {s.message && (s.status === 'error' || s.status === 'auth' || s.status === 'key') && <div class="hint" style={{ marginTop: '6px' }}>{s.message}</div>}
               <div class="row" style={{ marginTop: '14px', gap: '8px' }}>
                 <button class="btn sm" onClick={() => (s.status === 'auth' ? login() : syncNow())}><ICloud /> {s.status === 'auth' ? 'Entrar de nuevo' : 'Sincronizar ahora'}</button>
+              </div>
+              <div class="field">
+                <span>Clave de la app (solo si configuraste APP_KEY)</span>
+                <div class="row" style={{ gap: '8px' }}>
+                  <input class="input" type="password" value={key} onInput={(e) => setKey(e.currentTarget.value)} placeholder="Opcional" style={{ flex: 1 }} />
+                  <button class="btn sm" onClick={() => setAppKey(key)}>Guardar</button>
+                </div>
               </div>
             </div>
           </div>

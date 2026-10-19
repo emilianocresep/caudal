@@ -4,6 +4,8 @@
 //   ACCESS_TEAM_DOMAIN  ej. "miequipo.cloudflareaccess.com"
 //   ACCESS_AUD          el "Application Audience (AUD) Tag" de tu aplicación de Access
 //   ALLOWED_EMAIL       (opcional) tu correo; si se define, solo ese correo entra
+//   APP_KEY             (alternativa sin Access) una clave que escribes una vez en cada dispositivo
+//   Sin ninguna de estas variables, la API queda abierta (sin inicio de sesión).
 //   DEV_BYPASS = "1"    solo para desarrollo local (npm run preview). Nunca en producción.
 
 let certCache = { keys: null, at: 0, team: '' };
@@ -65,12 +67,31 @@ const json = (body, status = 200) =>
     headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
   });
 
+// Comparación en tiempo constante (evita adivinar la clave midiendo tiempos)
+async function sameText(a, b) {
+  const enc = new TextEncoder();
+  const [ha, hb] = await Promise.all([crypto.subtle.digest('SHA-256', enc.encode(a)), crypto.subtle.digest('SHA-256', enc.encode(b))]);
+  const x = new Uint8Array(ha), y = new Uint8Array(hb);
+  let diff = 0;
+  for (let i = 0; i < x.length; i++) diff |= x[i] ^ y[i];
+  return diff === 0;
+}
+
 /** Devuelve una Response de error si la petición no está autorizada; null si puede pasar. */
 export async function checkAccess(request, env) {
   if (env.DEV_BYPASS === '1') return null;
+
+  // Modo "clave": si APP_KEY está definida, cada dispositivo debe enviar esa clave.
   if (!env.ACCESS_TEAM_DOMAIN || !env.ACCESS_AUD) {
-    return json({ error: 'config', message: 'Faltan ACCESS_TEAM_DOMAIN y ACCESS_AUD en las variables del Worker.' }, 500);
+    if (!env.APP_KEY) return null; // Modo abierto: sin inicio de sesión
+    const key = request.headers.get('x-caudal-key') || '';
+    if (!(await sameText(key, env.APP_KEY))) {
+      return json({ error: 'key', message: key ? 'Clave incorrecta' : 'Falta la clave de la app' }, 401);
+    }
+    return null;
   }
+
+  // Modo Cloudflare Access
   const cookie = request.headers.get('cookie') || '';
   const fromCookie = cookie.match(/(?:^|;\s*)CF_Authorization=([^;]+)/)?.[1];
   const token = request.headers.get('cf-access-jwt-assertion') || fromCookie;

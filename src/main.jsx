@@ -71,7 +71,7 @@ function App() {
         {NAV.map(([k, href, label, Icon]) => <a href={href} class={active === k ? 'on' : ''}><Icon />{label}</a>)}
         <a href="#/ajustes" class={r.name === 'ajustes' ? 'on' : ''}><IGear />Ajustes</a>
         <button class="btn grad" onClick={() => openSheet('tx')}><IPlus /> Nuevo movimiento</button>
-        <div class="foot" title={syncState.value.message || ''}><span class={`syncdot ${st}`} />{st === 'ok' ? 'Sincronizado' : st === 'offline' ? 'Sin conexión' : st === 'syncing' ? 'Sincronizando…' : st === 'auth' ? <button class="linkbtn" onClick={login}>Iniciar sesión</button> : st === 'error' ? 'Sin servidor' : ''}</div>
+        <div class="foot" title={syncState.value.message || ''}><span class={`syncdot ${st}`} />{st === 'ok' ? 'Sincronizado' : st === 'offline' ? 'Sin conexión' : st === 'syncing' ? 'Sincronizando…' : st === 'auth' ? <button class="linkbtn" onClick={login}>Iniciar sesión</button> : st === 'error' ? 'Sin servidor' : st === 'key' ? <a class="linkbtn" href="#/ajustes">Falta la clave</a> : ''}</div>
       </aside>
 
       <main class={`main ${r.name === 'ajustes' ? 'narrow' : ''}`}>

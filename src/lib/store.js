@@ -115,7 +115,7 @@ function mergeRow(row) {
 async function post(body) {
   const res = await fetch('/api/sync', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', 'x-caudal-key': devicePref('key', '') },
     credentials: 'same-origin',
     redirect: 'manual', // si Access pide iniciar sesión, responde con una redirección
     body: JSON.stringify(body),
@@ -125,9 +125,9 @@ async function post(body) {
     const err = new Error('Cloudflare Access pide iniciar sesión'); err.code = 'auth'; throw err;
   }
   if (res.status === 401 || res.status === 403) {
-    let msg = 'Sesión no válida';
-    try { msg = (await res.json()).message || msg; } catch { /* sin detalle */ }
-    const err = new Error(msg); err.code = 'auth'; throw err;
+    let msg = 'Sesión no válida', code = 'auth';
+    try { const d = await res.json(); msg = d.message || msg; if (d.error === 'key') code = 'key'; } catch { /* sin detalle */ }
+    const err = new Error(msg); err.code = code; throw err;
   }
   const data = await res.json();
   if (!res.ok) { const err = new Error(data.message || 'Error del servidor'); err.code = data.error; throw err; }
@@ -163,6 +163,7 @@ export async function syncNow() {
     syncState.value = { status: 'ok', at: Date.now(), message: '' };
   } catch (e) {
     if (!navigator.onLine) syncState.value = { ...syncState.value, status: 'offline' };
+    else if (e.code === 'key') syncState.value = { ...syncState.value, status: 'key', message: e.message };
     else if (e.code === 'auth') syncState.value = { ...syncState.value, status: 'auth', message: e.message || 'Tu sesión expiró' };
     else syncState.value = { ...syncState.value, status: 'error', message: e.message || 'Sin conexión con el servidor' };
   } finally {
@@ -173,6 +174,9 @@ export async function syncNow() {
 
 /** Abre el inicio de sesión de Cloudflare Access y regresa a la app. */
 export function login() { location.href = '/api/login'; }
+
+/** Guarda la clave de la app en este dispositivo y vuelve a sincronizar. */
+export function setAppKey(k) { setDevicePref('key', (k || '').trim()); syncNow(); }
 
 export const pendingCount = computed(() => { version.value; syncState.value; return dirty.size; });
 

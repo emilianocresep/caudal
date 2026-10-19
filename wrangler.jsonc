@@ -1,7 +1,7 @@
 // Configuración del Worker de Caudal en Cloudflare.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "caudal",
+  "name": "caudal", // debe coincidir con el nombre de tu Worker en Cloudflare
   "main": "worker/index.js",
   "compatibility_date": "2025-10-01",
   "build": { "command": "npm run build" },
@@ -11,12 +11,14 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"]
   },
+  // La base de datos se crea sola en el primer despliegue (o se conecta si ya existe con este nombre).
   "d1_databases": [{ "binding": "DB", "database_name": "caudal-db" }],
   "vars": {
-    "ACCESS_TEAM_DOMAIN": "morning-wave-5908.cloudflareaccess.com",
-    "ACCESS_AUD": "e168ad276bd0d27ad19a9b0e850087147e5e06a74e6973b2d4b2a2d77c150f97",
-    "ALLOWED_EMAIL": "carmee1029@gmail.com"
+    // Clave opcional: escribe una aquí (por ejemplo "tacos-azules-2026") y la app te la pedirá
+    // una sola vez en cada dispositivo. Déjala vacía ("") para usar la app sin ninguna clave.
+    "APP_KEY": ""
   },
+  // Conserva las variables que pongas en el panel de Cloudflare.
   "keep_vars": true,
   "observability": { "enabled": true }
 }

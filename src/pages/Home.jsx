@@ -1,4 +1,5 @@
-import { db, movements, putMany, syncState, syncNow, login } from '../lib/store.js';
+import { db, movements, putMany, syncState, syncNow, login, setAppKey } from '../lib/store.js';
+import { useState } from 'preact/hooks';
 import { accountBalance, pendingForAccount, totals, computeBudget } from '../lib/finance.js';
 import { today, addDays, monthKey, monthName } from '../lib/dates.js';
 import { money, money0 } from '../lib/money.js';
@@ -6,6 +7,17 @@ import { openSheet, go } from '../lib/ui.js';
 import { SUGGESTED_ACCOUNTS, ACCOUNT_TYPES, SERIES } from '../lib/defaults.js';
 import { Money, Aura, MovementList, Empty } from '../components/ui.jsx';
 import { IGear, IPlus, IDown, IUp } from '../components/icons.jsx';
+
+function KeyBanner({ message }) {
+  const [k, setK] = useState('');
+  return (
+    <div class="banner" style={{ flexWrap: 'wrap' }}>
+      <span>{message}. Escríbela para sincronizar:</span>
+      <input class="input" type="password" value={k} onInput={(e) => setK(e.currentTarget.value)} onKeyDown={(e) => e.key === 'Enter' && setAppKey(k)} style={{ height: '36px', flex: 1, minWidth: '140px' }} aria-label="Clave de la app" />
+      <button onClick={() => setAppKey(k)}>Guardar</button>
+    </div>
+  );
+}
 
 function greeting() {
   const h = new Date().getHours();
@@ -70,6 +82,7 @@ export function Home() {
       {sync.status === 'auth' && (
         <div class="banner">Tu sesión expiró; tus cambios se guardan en este dispositivo.<button onClick={login}>Entrar</button></div>
       )}
+      {sync.status === 'key' && <KeyBanner message={sync.message} />}
       {sync.status === 'error' && (
         <div class="banner">Sin conexión con el servidor: {sync.message}<button onClick={() => syncNow()}>Reintentar</button></div>
       )}

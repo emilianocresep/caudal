@@ -27,40 +27,25 @@ Todo vive en tu cuenta gratuita de **Cloudflare**: un Worker sirve la app, D1 gu
 4. **Deploy**. En el primer despliegue Cloudflare **crea solo la base de datos D1** `caudal-db` y la conecta.
 5. Al terminar verás tu dirección, algo como `https://caudal.TU-SUBDOMINIO.workers.dev`. Anótala.
 
-### 3. Protege la app con tu correo (Cloudflare Access, gratis)
+### 3. Protección (opcional)
 
-Esto hace que solo tú puedas entrar: Cloudflare te envía un código a tu correo y la sesión dura hasta un mes.
+La app funciona **sin inicio de sesión**: abres la dirección y listo.
+Si quieres que nadie más pueda ver tus datos aunque conozca la dirección, pon una clave:
 
-1. Si nunca has usado **Zero Trust**, ábrelo una vez desde el panel, elige un *team name* (por ejemplo `emiliano`) y el plan **Free**.
-   Cloudflare podría pedirte una tarjeta para activar el plan gratuito; no cobra nada mientras no rebases 50 usuarios.
-2. Ve a tu Worker → **Settings → Domains & Routes**. En la fila de `workers.dev` abre el menú **⋯** y elige **Enable Cloudflare Access** (o el interruptor de *Access*).
-   Cloudflare crea la protección y te muestra dos datos: el **AUD** y el dominio de tu equipo `TU-TEAM.cloudflareaccess.com`. Cópialos.
-3. En la misma sección, **desactiva las *Preview URLs*** para que no exista otra dirección sin protección.
-4. Revisa quién puede entrar: **Zero Trust → Access → Applications → (la app de tu Worker) → Policies**.
-   Deja una sola regla **Allow** con **Include → Emails →** tu correo. El inicio de sesión **One-time PIN** (código por correo) viene activado por defecto.
+1. En GitHub abre `wrangler.jsonc`, haz clic en el lápiz y escribe tu clave entre las comillas de `"APP_KEY": ""`.
+2. **Commit changes**. Cloudflare publica de nuevo solo.
+3. La app te pedirá la clave una vez en cada dispositivo (también se puede cambiar en **Ajustes → Sincronización**).
 
-> Si no ves la opción del paso 2, hazlo a mano: **Zero Trust → Access → Applications → Add an application → Self-hosted**, con dominio `caudal.TU-SUBDOMINIO.workers.dev`, la política del paso 4 y *Session duration* de 1 mes. Copia el **Application Audience (AUD) Tag** desde la aplicación creada.
+> Alternativa avanzada: Cloudflare Access (código por correo). Si defines `ACCESS_TEAM_DOMAIN` y `ACCESS_AUD`, la app usa ese modo en lugar de la clave.
 
-### 4. Agrega las variables al Worker
-
-En tu Worker → **Settings → Variables and Secrets → Add**:
-
-| Nombre | Valor |
-|---|---|
-| `ACCESS_TEAM_DOMAIN` | `TU-TEAM.cloudflareaccess.com` |
-| `ACCESS_AUD` | el AUD que copiaste |
-| `ALLOWED_EMAIL` | tu correo (capa extra de seguridad) |
-
-Guarda con **Deploy**. Se conservan en futuros despliegues porque `wrangler.jsonc` tiene `keep_vars`.
-
-### 5. Instálala en tu celular
+### 4. Instálala en tu celular
 
 1. Abre tu dirección `https://caudal.TU-SUBDOMINIO.workers.dev` y entra con el código que te llega al correo.
 2. **Android (Chrome):** menú ⋮ → **Instalar app**. **iPhone (Safari):** botón Compartir → **Agregar a pantalla de inicio**.
 3. En la computadora, Chrome o Edge muestran un ícono de instalar en la barra de direcciones.
 
 Listo. En **Ajustes → Sincronización** debe aparecer el punto verde *Sincronizado*.
-Si aparece *No se pudo conectar con el servidor*, revisa las variables del paso 4.
+Si aparece *No se pudo conectar con el servidor*, revisa en Ajustes el motivo que muestra.
 
 Cada vez que subas cambios a GitHub, Cloudflare vuelve a publicar la app sola.
 
